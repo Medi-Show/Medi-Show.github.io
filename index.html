@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <!-- Bootstrap JS CDN (Optional, if you need Bootstrap JavaScript features) -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <title>Medi-Show</title>
+</head>
+<body>
+  <!-- Include Vue.js -->
+  <script src="https://unpkg.com/vue@2.6.14/dist/vue.js"></script>
+
+  <div id="app" class="">
+	  <div v-if="mode" class="d-flex justify-content-center align-items-center"
+    style="margin: 30px; height: 900px;"
+    >
+    <div>
+    <input 
+    v-model="code"
+    placeholder="Enter the Cupon code"
+    class="form-control mb-2" 
+    aria-describedby="passwordHelpBlock">
+    <button type="button" 
+    @click="check"
+    class="btn btn-success">Check</button>
+  </div>
+    </div>
+    <div v-if="!mode">
+    <div
+    style="margin: 30px; 
+    padding: 10px;
+    background-color: aliceblue;
+    height: 900px; border: solid 1px black;
+    border-radius: 10px;
+    overflow-y: scroll;"
+    >
+    <div
+    v-for="msg in msgs"
+    :class="{ 'bg-success' : msg.w == 'mi','bg-info' : msg.w == 'ym' ,
+      'msg_d_r' : msg.w == 'mi' , 'msg_d_l' : msg.w == 'ym'
+    }"
+    style="margin: 5px; padding: 8px; 
+    border: solid 1px rgb(248, 240, 240); 
+    word-wrap: break-word;
+    "
+    >
+   <!--  <p class='bg-light p-1'
+    style="
+    font-size: small;
+    border-radius: 10px;
+    opacity: 70%;
+    "
+    v-if="msg.w == 'mi'"> Michael</p>
+    <p v-if="msg.w == 'ym'"
+    class='bg-light p-1'
+    style="
+    font-size: small;
+    border-radius: 10px;
+    opacity: 70%;
+    "
+    > Yamini</p> -->
+    <b>{{ msg.m }}</b>
+    </div>
+    <div class="m-2">
+    
+    <input 
+    v-if="code == 'gg'"
+    v-model="tmp_ym"
+    class="form-control mb-2" 
+    aria-describedby="passwordHelpBlock">
+
+    <input
+    v-if="code == 'ww'"
+    v-model="tmp_mi"
+    class="form-control mb-2" 
+    aria-describedby="passwordHelpBlock">
+
+    <button type="button"
+    v-if="code == mi_cd" 
+    @click="mi"
+    class="btn btn-success">Send</button>
+
+    <button type="button" 
+    v-if="code == ym_cd" 
+    @click="ym"
+    class="btn btn-info">Send</button>
+  </div>
+    </div>
+    </div>
+  </div>
+
+  <script>
+    new Vue({
+      el: '#app',
+      data: {
+        ym_cd : 'gg',
+        mi_cd : 'ww',
+        code: '',
+        mode : true,
+        tmp_mi : '',
+        tmp_ym : '',
+        msgs : [
+        ]
+      },
+      methods:{
+        check(){
+          if(this.code == this.ym_cd || this.code == this.mi_cd){
+            this.mode = false
+          }
+        },
+        mi(){
+          let dt = {
+            "w":"mi",
+            "m" : this.tmp_mi
+          }
+          fetch("http://15.206.84.251:8080/p", {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(
+              dt
+            )
+          })
+          .then(response => response.json())
+          .then(data => {
+            console.log('Success:', data);
+          })
+          .catch(error => {
+            console.error('Error:', error);
+          });
+          this.tmp_mi = ''
+          
+        },
+        ym(){
+          let dt = {
+            "w":"ym",
+            "m" : this.tmp_ym
+          }
+          fetch("http://15.206.84.251:8080/p", {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(
+              dt
+            )
+          })
+          .then(response => response.json())
+          .then(data => {
+            console.log('Success:', data);
+          })
+          .catch(error => {
+            console.error('Error:', error);
+          });
+          this.tmp_ym = ''
+        }
+      },
+      mounted() {
+        setInterval(() => {
+          fetch("http://15.206.84.251:8080/g")
+            .then(res => res.json()) 
+            .then(data => {
+              this.msgs = data.chat; 
+            })
+            .catch(error => {
+              console.error('Error:', error);
+            });
+        }, 1000);
+      }      
+    });
+  </script>
+<style>
+
+  body {
+    background-image: url(https://www.animaker.com/hub/wp-content/uploads/2022/10/EKO4LKQXSXRDM8UC-1.gif);
+    font-family: Arial, sans-serif;
+    background-size: cover;
+    background-repeat: no-repeat;
+    margin: 0;
+  }
+  .msg_d_l{
+    text-align: left;
+    border-top-right-radius: 20px;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+  }
+  .msg_d_r{
+    text-align: right;
+    border-top-left-radius: 20px;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+  }
+  
+  .container {
+    width: 80%;
+    margin: 0 auto;
+  }
+  
+  /* Mobile Styles */
+  @media (max-width: 767px) {
+    .container {
+      width: 100%;
+      padding: 10px;
+    }
+  }
+  
+  /* Desktop Styles */
+  @media (min-width: 768px) {
+    .container {
+      width: 80%;
+      margin: 0 auto;
+    }
+  }
+  
+</style>
+
+</body>
+</html>
